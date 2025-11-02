@@ -3,6 +3,7 @@ from enum import StrEnum, auto, unique
 
 @unique
 class ErrorStatus(StrEnum):
+    CHECKING = auto()
     BOT_350 = auto()
     BOT_800 = auto()
     BOT_1300 = auto()

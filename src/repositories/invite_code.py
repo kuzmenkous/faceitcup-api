@@ -11,9 +11,7 @@ class InviteCodeRepository:
     async def get_invite_code_by_id(
         self, session: AsyncSession, invite_code_id: int
     ) -> InviteCodeModel:
-        return await self._repository.get_one(
-            session, (InviteCodeModel.id == invite_code_id,)
-        )
+        return await session.get_one(InviteCodeModel, invite_code_id)
 
     async def get_invite_code_by_code(
         self, session: AsyncSession, code: str
@@ -24,8 +22,7 @@ class InviteCodeRepository:
     async def get_all_invite_codes(
         self, session: AsyncSession
     ) -> tuple[InviteCodeModel, ...]:
-        stmt = select(InviteCodeModel)
-        return tuple(await session.scalars(stmt))
+        return await self._repository.get_all(session)
 
     async def delete_invite_code_by_id(
         self, session: AsyncSession, invite_code_id: int

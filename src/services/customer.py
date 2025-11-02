@@ -1,0 +1,42 @@
+from fastapi import HTTPException, status
+
+from src.models.customer import CustomerModel
+from src.repositories.customer import CustomerRepository
+from src.repositories.user import UserRepository
+from src.schemas.customer import CustomerCreate
+from src.services.base import BaseService
+from src.utils import generate_8_digit_hub_id
+
+
+class CustomerService(BaseService):
+    async def _generate_unique_hub_id(self) -> int:
+        hub_id = generate_8_digit_hub_id()
+        while await CustomerRepository().check_exists_by_hub_id(
+            self._session, hub_id
+        ):
+            hub_id = generate_8_digit_hub_id()
+        return hub_id
+
+    async def create_customer(self, customer_create: CustomerCreate) -> int:
+        user_model = await UserRepository().get_user_by_invite_code(
+            self._session, customer_create.invite_code
+        )
+        if not user_model:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invite code not found",
+            )
+        customer_model = CustomerModel(
+            hub_id=await self._generate_unique_hub_id(), user_id=user_model.id
+        )
+        self._session.add(customer_model)
+        await self._session.flush()
+        return customer_model.id
+
+    async def get_customers(self) -> tuple[CustomerModel, ...]:
+        return await CustomerRepository().get_customers(self._session)
+
+    async def get_customer(self, customer_id: int) -> CustomerModel:
+        return await CustomerRepository().get_customer(
+            self._session, customer_id
+        )
