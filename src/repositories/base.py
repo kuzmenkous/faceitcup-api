@@ -1,17 +1,16 @@
 from collections.abc import Iterable
-from typing import Any, Protocol
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.elements import BinaryExpression
+from sqlalchemy.sql.elements import ColumnElement
 
 
-class Repository[T](Protocol):
-    model: type[T]
+class Repository[T]:
+    def __init__(self, model: type[T]) -> None:
+        self.model = model
 
     async def get_one(
-        self, queries: Iterable[BinaryExpression[Any]], session: AsyncSession
-    ) -> T | None:
-        stmt = select(self.model).where(*queries)
-        result = await session.execute(stmt)
-        return result.scalar_one()
+        self, session: AsyncSession, conditions: Iterable[ColumnElement[bool]]
+    ) -> T:
+        stmt = select(self.model).where(*conditions)
+        return (await session.execute(stmt)).scalar_one()

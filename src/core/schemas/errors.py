@@ -2,5 +2,5 @@ from pydantic import BaseModel
 
 
 class ServerErrorSchema(BaseModel):
-    code: int
+    status_code: int
     detail: str

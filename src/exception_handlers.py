@@ -72,13 +72,13 @@ async def pydantic_validation_exception_handler(
     )
 
 
-async def http_400_and_404_status_exception_handler(
+async def http_400s_status_exception_handler(
     _request: Request, exc: HTTPException
 ) -> ORJSONResponse:
     return ORJSONResponse(
         status_code=exc.status_code,
         content=ServerErrorSchema(
-            code=exc.status_code, detail=exc.detail
+            status_code=exc.status_code, detail=exc.detail
         ).model_dump(),
     )
 
@@ -106,7 +106,7 @@ async def integrity_error_exception_handler(
             return ORJSONResponse(
                 status_code=status_code,
                 content=ServerErrorSchema(
-                    code=status_code,
+                    status_code=status_code,
                     detail=(
                         f"{explanation.split(' is not present in table ')[0]}"
                         f" not found"
@@ -116,7 +116,7 @@ async def integrity_error_exception_handler(
         return ORJSONResponse(
             status_code=status_code,
             content=ServerErrorSchema(
-                code=status_code, detail=f"{explanation} already exists"
+                status_code=status_code, detail=f"{explanation} already exists"
             ).model_dump(),
         )
     raise exc
@@ -128,6 +128,8 @@ def get_exception_handlers() -> dict:  # type: ignore[type-arg]
         RequestValidationError: pydantic_validation_exception_handler,
         NoResultFound: no_result_found_exception_handler,
         IntegrityError: integrity_error_exception_handler,
-        status.HTTP_400_BAD_REQUEST: http_400_and_404_status_exception_handler,
-        status.HTTP_404_NOT_FOUND: http_400_and_404_status_exception_handler,
+        status.HTTP_400_BAD_REQUEST: http_400s_status_exception_handler,
+        status.HTTP_404_NOT_FOUND: http_400s_status_exception_handler,
+        status.HTTP_401_UNAUTHORIZED: http_400s_status_exception_handler,
+        status.HTTP_403_FORBIDDEN: http_400s_status_exception_handler,
     }
