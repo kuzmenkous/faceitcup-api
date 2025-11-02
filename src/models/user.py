@@ -1,3 +1,4 @@
+from typing import Annotated
 from uuid import UUID
 
 from sqlalchemy import ForeignKey, text
@@ -16,12 +17,18 @@ class UserModel(BaseModel):
         return f"User: {self.id}"
 
 
-class SessionModel(BaseModel):
+UserId = Annotated[
+    int, ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+]
+
+
+class UserIdMixin:
+    user_id: Mapped[UserId]
+
+
+class SessionModel(UserIdMixin, BaseModel):
     __tablename__ = "sessions"
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
-    )
     token: Mapped[UUID] = mapped_column(
         unique=True, server_default=text("gen_random_uuid()")
     )
