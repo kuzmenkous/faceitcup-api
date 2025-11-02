@@ -116,7 +116,7 @@ async def integrity_error_exception_handler(
         return ORJSONResponse(
             status_code=status_code,
             content=ServerErrorSchema(
-                status_code=status_code, detail=f"{explanation} already exists"
+                status_code=status_code, detail=explanation
             ).model_dump(),
         )
     raise exc

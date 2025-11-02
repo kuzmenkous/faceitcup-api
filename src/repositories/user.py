@@ -4,6 +4,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
+from src.models.invite_code import InviteCodeModel
 from src.models.user import SessionModel, UserModel
 from src.repositories.base import Repository
 
@@ -17,6 +18,16 @@ class UserRepository:
         return await self._repository.get_one(
             session, (UserModel.username == username,)
         )
+
+    async def get_user_by_invite_code(
+        self, session: AsyncSession, invite_code: str
+    ) -> UserModel | None:
+        stmt = (
+            select(UserModel)
+            .join(InviteCodeModel)
+            .where(InviteCodeModel.code == invite_code)
+        )
+        return (await session.execute(stmt)).scalar_one_or_none()
 
 
 class SessionRepository:

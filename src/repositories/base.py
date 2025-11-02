@@ -14,3 +14,13 @@ class Repository[T]:
     ) -> T:
         stmt = select(self.model).where(*conditions)
         return (await session.execute(stmt)).scalar_one()
+
+    async def get_all(
+        self,
+        session: AsyncSession,
+        conditions: Iterable[ColumnElement[bool]] | None = None,
+    ) -> tuple[T, ...]:
+        stmt = select(self.model)
+        if conditions:
+            stmt = stmt.where(*conditions)
+        return tuple(await session.scalars(stmt))
