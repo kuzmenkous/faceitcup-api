@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -46,3 +46,8 @@ class UserRead(IdSchema, UserBase, CreatedAtMixin):
 class UserCredentials(BaseModel):
     username: str
     password: _PasswordForCheck
+
+
+class Login(BaseModel):
+    status: Literal["ok"] = "ok"
+    user: UserRead

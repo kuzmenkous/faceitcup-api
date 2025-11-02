@@ -10,7 +10,7 @@ from src.core.config import settings
 from src.core.schemas.errors import ServerErrorSchema
 from src.core.schemas.validation import ValidationErrorListSchema
 from src.exception_handlers import get_exception_handlers
-from src.routers import user_router
+from src.routers import auth_router
 
 
 @asynccontextmanager
@@ -81,5 +81,5 @@ app.add_middleware(
 )
 
 # Include routers
-for router in (user_router,):
+for router in (auth_router,):
     app.include_router(router)

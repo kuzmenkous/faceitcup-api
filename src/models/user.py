@@ -1,4 +1,7 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from uuid import UUID
+
+from sqlalchemy import ForeignKey, text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.base import BaseModel
 
@@ -11,3 +14,19 @@ class UserModel(BaseModel):
 
     def __str__(self) -> str:
         return f"User: {self.id}"
+
+
+class SessionModel(BaseModel):
+    __tablename__ = "sessions"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    )
+    token: Mapped[UUID] = mapped_column(
+        unique=True, server_default=text("gen_random_uuid()")
+    )
+
+    user: Mapped[UserModel] = relationship()
+
+    def __str__(self) -> str:
+        return f"Session: {self.id} for User: {self.user_id}"
