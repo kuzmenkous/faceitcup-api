@@ -18,7 +18,10 @@ class UserModel(BaseModel):
 
 
 UserId = Annotated[
-    int, ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    int,
+    mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE")
+    ),
 ]
 
 
