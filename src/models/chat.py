@@ -30,7 +30,7 @@ class ChatRoomModel(BaseModel):
         ForeignKey("customers.id", ondelete="CASCADE", onupdate="CASCADE")
     )
 
-    customer: Mapped[CustomerModel] = relationship()
+    customer: Mapped[CustomerModel] = relationship(innerjoin=True)
     messages_count: Mapped[int] = deferred(
         select(func.count())
         .where(ChatMessageModel.chat_room_id == id)

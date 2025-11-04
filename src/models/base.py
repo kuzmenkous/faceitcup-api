@@ -2,7 +2,15 @@ import enum
 from datetime import datetime
 from typing import Annotated, Any, ClassVar
 
-from sqlalchemy import DateTime, Enum, Identity, Integer, MetaData, func
+from sqlalchemy import (
+    DateTime,
+    Enum,
+    Identity,
+    Integer,
+    MetaData,
+    func,
+    inspect,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -46,6 +54,44 @@ class BaseModel(AsyncAttrs, DeclarativeBase):
         datetime: DateTime(timezone=True),
         enum.Enum: Enum(enum.Enum, inherit_schema=True),
     }
+
+    def __setattr__(self, key: str, value: object) -> None:
+        if (value_is_dict := isinstance(value, dict)) or (
+            value_is_list_of_dicts := (
+                isinstance(value, list)
+                and all(isinstance(item, dict) for item in value)
+            )
+        ):
+            relationship = inspect(self).mapper.relationships.get(key)
+            if relationship is not None:
+                try:
+                    if value_is_dict:
+                        if not relationship.uselist:
+                            value = relationship.mapper.class_(**value)
+                    elif value_is_list_of_dicts:  # noqa: SIM102
+                        if relationship.uselist:
+                            value = [
+                                relationship.mapper.class_(**item)
+                                for item in value
+                            ]
+                except TypeError:
+                    pass
+        super().__setattr__(key, value)
+
+    def setattr_for_update_with_nested_relationships(
+        self, field_name: str, field_value: object
+    ) -> None:
+        if (
+            isinstance(field_value, dict)
+            and field_name in inspect(self).mapper.relationships
+        ):
+            nested_model = getattr(self, field_name)
+            for nested_field_name, nested_value in field_value.items():
+                nested_model.setattr_for_update_with_nested_relationships(
+                    nested_field_name, nested_value
+                )
+        else:
+            setattr(self, field_name, field_value)
 
     def __repr__(self) -> str:
         return self.__str__()
