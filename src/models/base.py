@@ -1,8 +1,8 @@
 import enum
 from datetime import datetime
-from typing import Any, ClassVar
+from typing import Annotated, Any, ClassVar
 
-from sqlalchemy import DateTime, Enum, Identity, MetaData, func
+from sqlalchemy import DateTime, Enum, Identity, Integer, MetaData, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -24,11 +24,13 @@ metadata = MetaData(
     }
 )
 
+Id = Annotated[
+    int, mapped_column(Integer, Identity(), primary_key=True, sort_order=-1)
+]
+
 
 class BaseModel(AsyncAttrs, DeclarativeBase):
-    id: Mapped[int] = mapped_column(
-        Identity(), primary_key=True, sort_order=-1
-    )
+    id: Mapped[Id]
     created_at: Mapped[datetime] = mapped_column(
         server_default=func.now(), sort_order=100
     )

@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+from src.models.chat import ChatRoomModel
 from src.models.customer import CustomerModel
 from src.repositories.customer import CustomerRepository
 from src.repositories.user import UserRepository
@@ -31,6 +32,10 @@ class CustomerService(BaseService):
         )
         self._session.add(customer_model)
         await self._session.flush()
+
+        chat_room_model = ChatRoomModel(customer_id=customer_model.id)
+        self._session.add(chat_room_model)
+
         return customer_model.id
 
     async def get_customers(self) -> tuple[CustomerModel, ...]:
