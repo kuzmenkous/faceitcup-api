@@ -12,6 +12,13 @@ class ChatRoomService(BaseService):
             self._session, chat_room_id
         )
 
+    async def update_chat_room_is_customer_in_chat(
+        self, chat_room_id: int, is_customer_in_chat: bool
+    ) -> None:
+        await ChatRoomRepository().update_chat_room_is_customer_in_chat(
+            self._session, chat_room_id, is_customer_in_chat
+        )
+
 
 class ChatMessageService(BaseService):
     async def get_messages_by_chat_room_id(

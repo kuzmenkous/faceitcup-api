@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, undefer
 
@@ -25,6 +25,19 @@ class ChatRoomRepository:
         return await self._repository.exists(
             session, (ChatRoomModel.id == chat_room_id,)
         )
+
+    async def update_chat_room_is_customer_in_chat(
+        self,
+        session: AsyncSession,
+        chat_room_id: int,
+        is_customer_in_chat: bool,
+    ) -> None:
+        stmt = (
+            update(ChatRoomModel)
+            .where(ChatRoomModel.id == chat_room_id)
+            .values(is_customer_in_chat=is_customer_in_chat)
+        )
+        await session.execute(stmt)
 
 
 class ChatMessageRepository:

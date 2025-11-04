@@ -16,7 +16,7 @@ from src.core.db.session import session_getter
 from src.dependencies.chat import check_chat_room_exists
 from src.models.chat import ChatMessageModel
 from src.schemas.chat import ChatMessage, ChatMessageCreate, ChatNotification
-from src.services.chat import ChatMessageService
+from src.services.chat import ChatMessageService, ChatRoomService
 from src.ws.managers.chat import (
     chat_connection_manager,
     chat_notification_connection_manager,
@@ -82,6 +82,11 @@ async def _handle_chat_websocket(
     )
 
     if author_type == AuthorType.CUSTOMER:
+        async with session_getter.begin() as session:
+            await ChatRoomService(
+                session
+            ).update_chat_room_is_customer_in_chat(chat_room_id, True)
+
         await _send_customer_connection_notification(
             chat_room_id=chat_room_id, connected=True
         )
@@ -104,6 +109,11 @@ async def _handle_chat_websocket(
             websocket=websocket, chat_room_id=chat_room_id
         )
         if author_type == AuthorType.CUSTOMER:
+            async with session_getter.begin() as session:
+                await ChatRoomService(
+                    session
+                ).update_chat_room_is_customer_in_chat(chat_room_id, False)
+
             await _send_customer_connection_notification(
                 chat_room_id=chat_room_id, connected=False
             )
