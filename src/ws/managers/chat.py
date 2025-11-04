@@ -24,26 +24,23 @@ class ChatConnectionManager(AbstractConnectionManager):
             if not self.room_connections[chat_room_id]:
                 del self.room_connections[chat_room_id]
 
-    async def broadcast(
-        self,
-        websocket: WebSocket,
-        message: ChatMessage,
-        exclude_sender: bool = False,
-    ) -> None:
-        if message.chat_room_id not in self.room_connections:
+    async def broadcast(self, chat_message: ChatMessage) -> None:
+        if chat_message.chat_room_id not in self.room_connections:
             return
 
         disconnected_websockets = set()
-        for connection in self.room_connections[message.chat_room_id]:
-            if exclude_sender and connection == websocket:
-                continue
+        for connection in self.room_connections[chat_message.chat_room_id]:
             try:
-                await connection.send_json(message.model_dump(mode="json"))
+                await connection.send_json(
+                    chat_message.model_dump(mode="json")
+                )
             except Exception:  # noqa: BLE001
                 disconnected_websockets.add(connection)
 
         for disconnected_websocket in disconnected_websockets:
-            await self.disconnect(disconnected_websocket, message.chat_room_id)
+            await self.disconnect(
+                disconnected_websocket, chat_message.chat_room_id
+            )
 
 
 class ChatNotificationConnectionManager(AbstractConnectionManager):

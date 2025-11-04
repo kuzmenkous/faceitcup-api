@@ -26,7 +26,6 @@ chat_router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 async def _process_and_save_message(
-    websocket: WebSocket,
     chat_room_id: PositiveInt,
     author_type: AuthorType,
     message_data: dict[str, Any],
@@ -45,9 +44,7 @@ async def _process_and_save_message(
         await session.flush()
 
         chat_message_to_send = ChatMessage.model_validate(chat_message_model)
-        await chat_connection_manager.broadcast(
-            websocket=websocket, message=chat_message_to_send
-        )
+        await chat_connection_manager.broadcast(chat_message_to_send)
 
         chat_room_messages_count = await ChatMessageService(
             session
@@ -95,7 +92,6 @@ async def _handle_chat_websocket(
         while True:
             message_data: dict[str, Any] = await websocket.receive_json()
             await _process_and_save_message(
-                websocket=websocket,
                 chat_room_id=chat_room_id,
                 author_type=author_type,
                 message_data=message_data,
