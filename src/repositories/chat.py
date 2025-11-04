@@ -13,9 +13,15 @@ class ChatRoomRepository:
     async def get_chat_rooms(
         self, session: AsyncSession
     ) -> tuple[ChatRoomModel, ...]:
-        stmt = select(ChatRoomModel).options(
-            undefer(ChatRoomModel.messages_count),
-            joinedload(ChatRoomModel.customer).load_only(CustomerModel.hub_id),
+        stmt = (
+            select(ChatRoomModel)
+            .where(CustomerModel.second_steam_connected)
+            .options(
+                undefer(ChatRoomModel.messages_count),
+                joinedload(ChatRoomModel.customer).load_only(
+                    CustomerModel.hub_id
+                ),
+            )
         )
         return tuple((await session.execute(stmt)).scalars())
 
