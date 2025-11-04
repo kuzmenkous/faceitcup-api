@@ -14,7 +14,7 @@ class CustomerModel(UserIdMixin, BaseModel):
         server_default=false()
     )
     second_steam_connected: Mapped[bool] = mapped_column(
-        server_default=false()
+        server_default=false(), index=True
     )
     error_status: Mapped[ErrorStatus] = mapped_column(
         server_default=ErrorStatus.CHECKING.name

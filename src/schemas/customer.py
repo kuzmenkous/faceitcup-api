@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from src.constants.customer import ErrorStatus
 from src.schemas.base import IdSchema
 
 
@@ -13,4 +14,5 @@ class CustomerRead(IdSchema):
     hub_id: int
     original_steam_connected: bool
     second_steam_connected: bool
+    error_status: ErrorStatus
     created_at: datetime
