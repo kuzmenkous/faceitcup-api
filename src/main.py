@@ -33,6 +33,7 @@ app = FastAPI(
     version=str(settings.app.version),
     docs_url=settings.app.docs_url if settings.debug else None,
     redoc_url=settings.app.redoc_url if settings.debug else None,
+    lifespan=lifespan,
     exception_handlers=get_exception_handlers(),
     default_response_class=ORJSONResponse,
     responses={

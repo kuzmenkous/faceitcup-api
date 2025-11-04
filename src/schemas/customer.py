@@ -15,9 +15,17 @@ class CustomerUpdate(BaseModel):
     second_steam_connected: bool
 
 
-class CustomerRead(CustomerUpdate, IdSchema):
+class SetCustomerErrorStatus(BaseModel):
+    error_status: ErrorStatus
+
+
+class CustomerRead(CustomerUpdate, SetCustomerErrorStatus, IdSchema):
     hub_id: int
     original_steam_connected: bool
     second_steam_connected: bool
-    error_status: ErrorStatus
     created_at: datetime
+
+
+class CustomerErrorStatusUpdate(BaseModel):
+    hub_id: int
+    error_status: ErrorStatus
