@@ -10,7 +10,12 @@ class CustomerCreate(BaseModel):
     invite_code: str = Field(..., exclude=True)
 
 
-class CustomerRead(IdSchema):
+class CustomerUpdate(BaseModel):
+    original_steam_connected: bool
+    second_steam_connected: bool
+
+
+class CustomerRead(CustomerUpdate, IdSchema):
     hub_id: int
     original_steam_connected: bool
     second_steam_connected: bool

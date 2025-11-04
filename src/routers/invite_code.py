@@ -14,20 +14,20 @@ invite_codes_router = APIRouter(prefix="/invite_codes", tags=["Invite Codes"])
     response_description="id of the created invite code",
 )
 async def create_invite_code(
-    db_session: Session,
+    session: Session,
     logged_in_user: LoggedInUser,
     invite_code_create: InviteCodeCreate,
 ) -> int:
-    return await InviteCodeService(db_session).create_invite_code(
+    return await InviteCodeService(session).create_invite_code(
         invite_code_create, logged_in_user.id
     )
 
 
 @invite_codes_router.get("", dependencies=[Depends(get_user_by_api_token)])
-async def get_invite_codes(db_session: Session) -> tuple[InviteCodeRead, ...]:
+async def get_invite_codes(session: Session) -> tuple[InviteCodeRead, ...]:
     return tuple(
         InviteCodeRead.model_validate(code)
-        for code in await InviteCodeService(db_session).get_all_invite_codes()
+        for code in await InviteCodeService(session).get_all_invite_codes()
     )
 
 
@@ -36,7 +36,5 @@ async def get_invite_codes(db_session: Session) -> tuple[InviteCodeRead, ...]:
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(get_user_by_api_token)],
 )
-async def delete_invite_code(db_session: Session, invite_code_id: int) -> None:
-    await InviteCodeService(db_session).delete_invite_code_by_id(
-        invite_code_id
-    )
+async def delete_invite_code(session: Session, invite_code_id: int) -> None:
+    await InviteCodeService(session).delete_invite_code_by_id(invite_code_id)

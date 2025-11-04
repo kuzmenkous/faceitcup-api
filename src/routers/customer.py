@@ -1,7 +1,11 @@
-from fastapi import APIRouter
+from typing import Annotated
 
+from fastapi import APIRouter, Depends
+
+from src.dependencies.customer import get_customer_model
 from src.dependencies.db import Session
-from src.schemas.customer import CustomerCreate, CustomerRead
+from src.models.customer import CustomerModel
+from src.schemas.customer import CustomerCreate, CustomerRead, CustomerUpdate
 from src.services.customer import CustomerService
 
 customers_router = APIRouter(prefix="/customers", tags=["Customers"])
@@ -9,21 +13,30 @@ customers_router = APIRouter(prefix="/customers", tags=["Customers"])
 
 @customers_router.post("", response_description="id of the created customer")
 async def create_customer(
-    db_session: Session, customer_create: CustomerCreate
+    session: Session, customer_create: CustomerCreate
 ) -> int:
-    return await CustomerService(db_session).create_customer(customer_create)
+    return await CustomerService(session).create_customer(customer_create)
 
 
 @customers_router.get("")
-async def get_customers(db_session: Session) -> tuple[CustomerRead, ...]:
+async def get_customers(session: Session) -> tuple[CustomerRead, ...]:
     return tuple(
         CustomerRead.model_validate(customer)
-        for customer in await CustomerService(db_session).get_customers()
+        for customer in await CustomerService(session).get_customers()
     )
 
 
 @customers_router.get("/{customer_id}")
-async def get_customer(db_session: Session, customer_id: int) -> CustomerRead:
-    return CustomerRead.model_validate(
-        await CustomerService(db_session).get_customer(customer_id)
-    )
+async def get_customer(
+    customer_model: Annotated[CustomerModel, Depends(get_customer_model)],
+) -> CustomerRead:
+    return CustomerRead.model_validate(customer_model)
+
+
+@customers_router.put("/{customer_id}")
+async def update_customer(
+    customer_model: Annotated[CustomerModel, Depends(get_customer_model)],
+    customer_update: CustomerUpdate,
+) -> None:
+    for field_name, value in customer_update.model_dump().items():
+        setattr(customer_model, field_name, value)

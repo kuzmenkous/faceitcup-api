@@ -1,6 +1,6 @@
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.orm import contains_eager, undefer
 
 from src.models.chat import ChatMessageModel, ChatRoomModel
 from src.models.customer import CustomerModel
@@ -15,10 +15,11 @@ class ChatRoomRepository:
     ) -> tuple[ChatRoomModel, ...]:
         stmt = (
             select(ChatRoomModel)
+            .join(CustomerModel)
             .where(CustomerModel.second_steam_connected)
             .options(
                 undefer(ChatRoomModel.messages_count),
-                joinedload(ChatRoomModel.customer).load_only(
+                contains_eager(ChatRoomModel.customer).load_only(
                     CustomerModel.hub_id
                 ),
             )
