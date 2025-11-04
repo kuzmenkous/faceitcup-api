@@ -45,6 +45,9 @@ RUN chmod +x /app/run.sh
 
 ENV PYTHONPATH="/app/api/src:${PYTHONPATH}"
 
+FROM src AS ws
+ENTRYPOINT [ "uvicorn", "src.ws.app:app", "--host", "0.0.0.0", "--port", "80", "--loop", "uvloop" ]
+
 FROM src AS api
 
 ENTRYPOINT ["/app/run.sh"]

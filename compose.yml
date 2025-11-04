@@ -47,6 +47,35 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data/
 
+  ws:
+    profiles: [ "prod" ]
+    <<: *launch
+    build:
+      context: .
+      target: ws
+    environment:
+      DEBUG: 0
+      <<: *db_envs
+    ports: [ "127.0.0.1:8002:80" ]
+    depends_on:
+      <<: *depends_on_db_and_message_queue
+
+  ws-dev:
+    profiles: [ "dev" ]
+    <<: *launch
+    build:
+      context: .
+      target: ws
+    environment:
+      DEBUG: 1
+      <<: *db_envs
+    command: [ "--reload" ]
+    ports: [ "127.0.0.1:8002:80" ]
+    depends_on:
+      <<: *depends_on_db_and_message_queue
+    volumes:
+      - .:/app/api
+
   api:
     <<: *api
     profiles: [ "prod" ]

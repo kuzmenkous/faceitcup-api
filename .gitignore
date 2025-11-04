@@ -161,3 +161,8 @@ mailer_data/
 # Claude
 .claude
 CLAUDE.md
+
+# Test html files
+admin_chat.html
+customer_chat.html
+notifications.html

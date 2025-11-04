@@ -26,6 +26,8 @@ dependencies = [
     "argon2-cffi (>=25.1.0,<26.0.0)",
     "orjson (>=3.11.3,<4.0.0)",
     "faststream[cli,rabbit] (>=0.5.48,<0.6.0)",
+    "websockets (>=15.0.1,<16.0.0)",
+    "uvloop (>=0.22.1,<0.23.0)",
 ]
 
 [tool.poetry.requires-plugins]
