@@ -40,6 +40,7 @@ COPY alembic.ini .
 COPY migrations migrations
 COPY scripts/run.sh /app/run.sh
 COPY supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY .env .
 
 RUN chmod +x /app/run.sh
 
