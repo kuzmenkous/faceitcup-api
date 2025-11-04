@@ -39,7 +39,7 @@ class UserCreate(UserBase):
         return password_hasher.hash(self.password.get_secret_value())
 
 
-class UserRead(IdSchema, UserBase, CreatedAtMixin):
+class UserRead(CreatedAtMixin, UserBase, IdSchema):
     pass
 
 

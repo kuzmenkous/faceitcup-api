@@ -2,10 +2,17 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from src.adapters.broker import broker
 from src.dependencies.customer import get_customer_model
 from src.dependencies.db import Session
 from src.models.customer import CustomerModel
-from src.schemas.customer import CustomerCreate, CustomerRead, CustomerUpdate
+from src.schemas.customer import (
+    CustomerCreate,
+    CustomerErrorStatusUpdate,
+    CustomerRead,
+    CustomerUpdate,
+    SetCustomerErrorStatus,
+)
 from src.services.customer import CustomerService
 
 customers_router = APIRouter(prefix="/customers", tags=["Customers"])
@@ -40,3 +47,19 @@ async def update_customer(
 ) -> None:
     for field_name, value in customer_update.model_dump().items():
         setattr(customer_model, field_name, value)
+
+
+@customers_router.post("/{hub_id}/set_error")
+async def set_customer_error_status(
+    customer_model: Annotated[CustomerModel, Depends(get_customer_model)],
+    error_status_data: SetCustomerErrorStatus,
+) -> None:
+    customer_model.error_status = error_status_data.error_status
+
+    await broker.publish(
+        CustomerErrorStatusUpdate(
+            hub_id=customer_model.hub_id,
+            error_status=error_status_data.error_status,
+        ),
+        queue="customer_error_status_updates",
+    )
