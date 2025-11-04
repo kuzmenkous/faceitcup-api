@@ -49,7 +49,7 @@ async def update_customer(
         setattr(customer_model, field_name, value)
 
 
-@customers_router.post("/{hub_id}/set_error")
+@customers_router.post("/{customer_id}/set_error")
 async def set_customer_error_status(
     customer_model: Annotated[CustomerModel, Depends(get_customer_model)],
     error_status_data: SetCustomerErrorStatus,
