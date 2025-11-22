@@ -1,13 +1,23 @@
 from datetime import datetime
+from typing import Self
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, model_validator
 
 from src.constants.customer import ErrorStatus
 from src.schemas.base import IdSchema
 
 
 class CustomerCreate(BaseModel):
-    invite_code: str = Field(..., exclude=True)
+    invite_code: str | None = None
+    create_verified: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_invite_code(self) -> Self:
+        if not self.create_verified and not self.invite_code:
+            raise ValueError(
+                "Invite code is required for unverified customer creation."
+            )
+        return self
 
 
 class CustomerUpdate(BaseModel):

@@ -12,6 +12,17 @@ from src.repositories.base import Repository
 class UserRepository:
     _repository: Repository[UserModel] = Repository(UserModel)
 
+    async def get_first_user(self, session: AsyncSession) -> UserModel | None:
+        return (
+            (
+                await session.execute(
+                    select(UserModel).order_by(UserModel.created_at.asc())
+                )
+            )
+            .scalars()
+            .first()
+        )
+
     async def get_user_by_username(
         self, session: AsyncSession, username: str
     ) -> UserModel:
